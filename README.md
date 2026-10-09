@@ -1,36 +1,85 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# FitForge Nutrition admin
 
-## Getting Started
+Shop desk for a fitness retailer: products, FEFO inventory, counter billing, GST-style invoices, purchases, expenses, and reports. The seeded shop is **sample data for local development**, not a real business.
 
-First, run the development server:
+## Prerequisites
+
+- Node.js 20+
+- MySQL on localhost port 3306
+
+## Setup
 
 ```bash
+cp .env.example .env
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+This folder is the shop desk. Its `.env` only has `NEXT_PUBLIC_API_URL`. The database, Prisma, mail, storage, and WhatsApp settings live in `../GYM-API`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+From `GYM-API`, run `npm install` and `npm run dev`. That API listens on http://localhost:4000. Apply migrations and seed from that folder with `npx prisma migrate deploy` and `npm run db:seed`.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Open http://localhost:3000 and sign in:
 
-## Learn More
+| Role | Email | Password |
+| --- | --- | --- |
+| Owner | owner@fitforge.demo | FitForge#2026 |
+| Manager | manager@fitforge.demo | FitForge#2026 |
+| Cashier | cashier@fitforge.demo | FitForge#2026 |
+| Inventory | inventory@fitforge.demo | FitForge#2026 |
+| Accountant | accountant@fitforge.demo | FitForge#2026 |
 
-To learn more about Next.js, take a look at the following resources:
+## Scripts
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- `npm run dev` starts the shop desk on port 3000
+- Start the API from `../GYM-API` with `npm run dev`. It listens on port **4000**
+- `npm run test` runs unit tests
+- `npm run test:e2e` runs Playwright (requires the database and `npx playwright install`)
+- `npm run typecheck` and `npm run lint`
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Money, stock, and invoices
 
-## Deploy on Vercel
+- Amounts are MySQL decimals. The app does not calculate money with binary floats in the pricing, tax, or register logic.
+- Timestamps are stored in UTC. Shop dates use `Asia/Kolkata`.
+- **Net sales** are merchandise after discounts and returns, excluding GST.
+- **Invoice total** includes GST and rupee rounding.
+- **Cash collected** is cash payments minus cash refunds. UPI, card, and bank receipts are reported with payment methods, not as cash.
+- **Gross profit** is net sales minus the cost of the batches actually sold.
+- **Operating profit** is gross profit minus recorded expenses.
+- Stock changes only inside a database transaction that also writes a stock movement.
+- Sales use **FEFO**: earliest expiry first. Expired and recalled batches cannot be sold.
+- Negative stock is rejected unless an authorized role explicitly overrides it.
+- Purchase orders do not increase stock. Goods receipts do.
+- Issued invoices are not edited. Use a return, which creates a credit note.
+- Repeating a checkout with the same idempotency key does not bill twice.
+- Invoice numbers are `PREFIX-FY-00001`, allocated with a locked sequence. The financial year starts in April.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## WhatsApp and email
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Leave `WHATSAPP_PROVIDER=none` to use a click-to-chat link. That link is stored as `CLICK_TO_CHAT` and is **not** a delivered message.
+
+For the WhatsApp Cloud API set `WHATSAPP_PROVIDER=meta`, `WHATSAPP_TOKEN`, `WHATSAPP_PHONE_NUMBER_ID`, `WHATSAPP_APP_SECRET`, and `WHATSAPP_VERIFY_TOKEN`. Point the webhook to `/api/whatsapp/webhook`. Templates must be approved in Meta; the app does not bypass that.
+
+Twilio uses `WHATSAPP_PROVIDER=twilio` plus `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, and `TWILIO_WHATSAPP_FROM`.
+
+Customers must opt in before the app calls the provider. Credentials stay in environment variables.
+
+Email (password reset and optional invoice mail) needs `SMTP_HOST` and `SMTP_FROM`. Without them, development shows the reset link on screen and does not claim an email was sent.
+
+## Images
+
+The API stores new product images in this app's `public/uploads` folder unless S3 is configured in `GYM-API/.env`. Seed photos use Unsplash source URLs. If a remote image fails, the product image falls back to `/placeholders/product.svg`.
+
+## Backups and deployment
+
+```bash
+mysqldump -uroot -p gym_admin > fitforge.sql
+```
+
+The API that can be uploaded to Lambda lives in `../GYM-API`. Invoice PDFs open inline at `/api/invoices/<id>/pdf` and download with `?download=1`.
+
+For production, set the API `.env`, serve this desk with `npm run build` and `npm start`, put TLS in front of it, and keep both `.env` files out of git. Session cookies are `HttpOnly`, `SameSite=Lax`, and `Secure` in production. Passwords are hashed with bcrypt. Login attempts are rate-limited and accounts lock after repeated failures.
+
+## Health
+
+`GET /api/health` reports database, storage, email, and WhatsApp configuration without revealing secrets.
