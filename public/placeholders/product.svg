@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="800" viewBox="0 0 800 800">
+  <rect width="800" height="800" fill="#f3f4f6"/>
+  <rect x="170" y="220" width="460" height="360" rx="28" fill="#16181d"/>
+  <rect x="210" y="270" width="380" height="180" rx="16" fill="#c6f135"/>
+  <text x="400" y="500" text-anchor="middle" font-family="Arial, sans-serif" font-size="42" fill="#16181d">FitForge</text>
+</svg>
