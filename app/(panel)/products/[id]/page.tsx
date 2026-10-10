@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { guard } from "@/lib/auth";
 import { load } from "@/lib/api";
 import { formatInr } from "@/lib/money";
@@ -22,7 +23,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
       </>} />
       <div className="mb-4 flex gap-3 overflow-x-auto">
         {(product.images.length ? product.images : [{ url: "/placeholders/product.svg", id: "fallback" }]).map((image) => (
-          <img key={image.id} src={image.url} alt={product.name} className="h-40 w-40 rounded-2xl object-cover" />
+          <Image key={image.id} src={image.url} alt={product.name} width={160} height={160} className="h-40 w-40 rounded-2xl object-cover" unoptimized />
         ))}
       </div>
       <p className="mb-4 text-sm text-muted">{product.description}</p>

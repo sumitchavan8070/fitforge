@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { checkoutAction } from "@/server/shop-actions";
 import { formatInr } from "@/lib/money";
 import { priceSale } from "@/lib/pricing";
@@ -131,7 +133,7 @@ export function PosScreen({ held, customers }: { held: { id: string; number: str
         <div className="mt-4 grid grid-cols-2 gap-3 xl:grid-cols-3">
           {items.map((item) => (
             <button key={item.variantId} disabled={item.available <= 0} onClick={() => add(item)} className="rounded-2xl border border-border bg-card p-3 text-left disabled:opacity-50">
-              <img src={item.image} alt="" className="mb-2 h-28 w-full rounded-xl object-cover" onError={(event) => { event.currentTarget.src = "/placeholders/product.svg"; }} />
+              <Image src={item.image || "/placeholders/product.svg"} alt="" width={280} height={112} className="mb-2 h-28 w-full rounded-xl object-cover" unoptimized onError={(event) => { event.currentTarget.src = "/placeholders/product.svg"; }} />
               <p className="text-sm font-semibold">{item.name}</p>
               <p className="text-xs text-muted">{[item.flavor, item.weightLabel, item.sku].filter(Boolean).join(" · ")}</p>
               <div className="mt-2 flex items-center justify-between text-sm"><span className="font-semibold">{formatInr(item.price)}</span><span className={item.available <= 0 ? "text-danger" : "text-muted"}>{item.available} in stock</span></div>
@@ -190,7 +192,7 @@ export function PosScreen({ held, customers }: { held: { id: string; number: str
           <Button type="button" variant="ghost" disabled={pending} onClick={() => submit("draft")}>Save draft</Button>
           {confirming ? <Button type="button" variant="ghost" onClick={() => setConfirming(false)}>Back</Button> : null}
         </div>
-        {held.length ? <div className="mt-4"><p className="text-xs font-semibold uppercase text-muted">Held bills</p>{held.map((order) => <a key={order.id} className="mt-1 block text-sm underline" href={`/orders/${order.id}`}>{order.number} · {formatInr(order.grandTotal)}</a>)}</div> : null}
+        {held.length ? <div className="mt-4"><p className="text-xs font-semibold uppercase text-muted">Held bills</p>{held.map((order) => <Link key={order.id} className="mt-1 block text-sm underline" href={`/orders/${order.id}`}>{order.number} · {formatInr(order.grandTotal)}</Link>)}</div> : null}
       </aside>
     </div>
   );

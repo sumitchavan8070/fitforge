@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useFieldArray, useForm } from "react-hook-form";
 import { productSchema, type ProductInput } from "@/lib/validators";
@@ -115,7 +116,7 @@ export function ProductForm({
         <div className="mt-2 flex gap-2">
           {images.map((url) => (
             <div key={url} className="relative">
-              <img src={url} alt="" className="h-20 w-20 rounded-xl object-cover" onError={(event) => { event.currentTarget.src = "/placeholders/product.svg"; }} />
+              <Image src={url || "/placeholders/product.svg"} alt="" width={80} height={80} className="h-20 w-20 rounded-xl object-cover" unoptimized onError={(event) => { event.currentTarget.src = "/placeholders/product.svg"; }} />
               <button type="button" className="text-xs" onClick={() => form.setValue("imageUrls", images.filter((item) => item !== url))}>Remove</button>
             </div>
           ))}

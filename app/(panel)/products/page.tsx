@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { guard } from "@/lib/auth";
 import { api, qs } from "@/lib/api";
 import { formatInr } from "@/lib/money";
@@ -19,7 +20,7 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
       <PageHeader title="Products" description="Catalog, variants, and stock status from the database." actions={<>
         <LinkButton href={view === "grid" ? "/products" : "/products?view=grid"} variant="secondary">{view === "grid" ? "Table view" : "Grid view"}</LinkButton>
         <LinkButton href="/products/new">Add product</LinkButton>
-        <a className="inline-flex h-10 items-center rounded-xl border border-border px-3 text-sm font-semibold" href="/api/products/export">Export CSV</a>
+        <a className="inline-flex h-10 items-center rounded-xl border border-border px-3 text-sm font-semibold" href="/api/products/export" download>Export CSV</a>
       </>} />
       <form className="mb-3 grid gap-2 rounded-2xl border border-border bg-card p-3 md:grid-cols-4" action="/products">
         <input className={inputClass} name="q" defaultValue={query.q} placeholder="Name, SKU, barcode, brand" aria-label="Search products" />
@@ -55,7 +56,7 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           {result.rows.map((product) => (
             <Link key={product.id} href={`/products/${product.id}`} className="rounded-2xl border border-border bg-card p-3">
-              <img src={product.images[0]?.url || "/placeholders/product.svg"} alt="" className="h-36 w-full rounded-xl object-cover" />
+              <Image src={product.images[0]?.url || "/placeholders/product.svg"} alt="" width={320} height={144} className="h-36 w-full rounded-xl object-cover" unoptimized />
               <p className="mt-2 font-semibold">{product.name}</p>
               <p className="text-sm text-muted">{formatInr(product.sellingPrice.toString())} · {product.onHand} in stock</p>
             </Link>

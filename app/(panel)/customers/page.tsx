@@ -11,7 +11,7 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
   const { customers, groups } = await api(`/api/desk/customers${qs(query)}`);
   return (
     <div>
-      <PageHeader title="Customers" description="Phone and email are checked for duplicates. Export omits internal notes." actions={<a className="inline-flex h-10 items-center rounded-xl border border-border px-3 text-sm font-semibold" href="/api/customers/export">Export</a>} />
+      <PageHeader title="Customers" description="Phone and email are checked for duplicates. Export omits internal notes." actions={<a className="inline-flex h-10 items-center rounded-xl border border-border px-3 text-sm font-semibold" href="/api/customers/export" download>Export</a>} />
       <form className="mb-3 flex gap-2" action="/customers">
         <input className={inputClass} name="q" defaultValue={query.q} placeholder="Name, phone, or email" aria-label="Search customers" />
         <input className={inputClass} name="tag" defaultValue={query.tag} placeholder="Tag" aria-label="Tag" />

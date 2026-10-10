@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
+import Link from "next/link";
 import { loginAction } from "@/server/auth-actions";
 import { Button, ErrorText, Field, inputClass } from "@/components/ui";
 
@@ -20,7 +21,7 @@ export default function LoginPage() {
           <Field label="Email"><input name="email" type="email" autoComplete="username" required className={inputClass} defaultValue="owner@fitforge.demo" /></Field>
           <Field label="Password"><input name="password" type="password" autoComplete="current-password" required className={inputClass} defaultValue="FitForge#2026" /></Field>
           <Button className="w-full" disabled={pending}>{pending ? "Signing in…" : "Sign in"}</Button>
-          <a className="block text-sm text-muted" href="/forgot-password">Forgot password</a>
+          <Link className="block text-sm text-muted" href="/forgot-password">Forgot password</Link>
           <p className="text-xs text-muted">Demo owner: owner@fitforge.demo / FitForge#2026. Other roles use the same password: manager, cashier, inventory, accountant @fitforge.demo.</p>
         </form>
       </section>

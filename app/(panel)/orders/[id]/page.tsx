@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { guard } from "@/lib/auth";
 import { load } from "@/lib/api";
 import { formatDateTime } from "@/lib/format";
@@ -15,7 +16,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
     <div>
       <PageHeader title={order.number} description={order.customer?.name || "Walk-in customer"} actions={<><StatusBadge value={order.status} /><StatusBadge value={order.paymentStatus} /></>} />
       <p className="mb-4 text-sm">Total {formatInr(order.grandTotal.toString())} · Paid {formatInr(order.paidTotal.toString())} · COGS {formatInr(order.cogsTotal.toString())}</p>
-      {order.invoice ? <a className="text-sm font-semibold underline" href={`/invoices/${order.invoice.id}`}>Invoice {order.invoice.number}</a> : null}
+      {order.invoice ? <Link className="text-sm font-semibold underline" href={`/invoices/${order.invoice.id}`}>Invoice {order.invoice.number}</Link> : null}
       <div className="mt-4"><DataTable columns={["Item", "SKU", "Qty", "Returned", "Price", "Discount", "Tax", "Total"]} rows={order.items.map((item) => [item.name, item.sku, item.quantity.toString(), item.returnedQty.toString(), formatInr(item.unitPrice.toString()), formatInr(item.discount.toString()), formatInr(item.taxAmount.toString()), formatInr(item.lineTotal.toString())])} /></div>
       <h2 className="mb-2 mt-6 font-semibold">Timeline</h2>
       <ol className="space-y-2 text-sm">{order.events.map((event) => <li key={event.id}><span className="text-muted">{formatDateTime(event.createdAt)}</span> · {event.message}</li>)}</ol>

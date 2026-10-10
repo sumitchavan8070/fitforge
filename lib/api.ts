@@ -3,7 +3,11 @@ import { redirect } from "next/navigation";
 
 const base = () => process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:4000";
 
-export async function api<T = any>(path: string, init?: RequestInit): Promise<T> {
+// Desk payloads are JSON from the API. Pages read the fields they render.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type DeskData = any;
+
+export async function api<T = DeskData>(path: string, init?: RequestInit): Promise<T> {
   const token = (await cookies()).get("gym_token")?.value;
   const response = await fetch(`${base()}${path}`, {
     ...init,
@@ -46,7 +50,17 @@ function isNextRedirect(error: unknown) {
   return typeof error === "object" && error !== null && "digest" in error && String((error as { digest?: string }).digest || "").startsWith("NEXT_REDIRECT");
 }
 
-type ActionResult = { error?: string; redirect?: string; [key: string]: any };
+type ActionResult = {
+  error?: string;
+  redirect?: string;
+  id?: string;
+  orderId?: string;
+  invoiceId?: string;
+  status?: string;
+  url?: string | null;
+  ok?: boolean;
+  devLink?: string | null;
+};
 
 export async function postAction(path: string, body: unknown): Promise<ActionResult> {
   try {
